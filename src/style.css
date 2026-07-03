@@ -37,14 +37,13 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 12px;
 }
 
 .screen {
   display: none;
   flex-direction: column;
   height: 100%;
-  padding: 20px;
+  padding: 16px;
   animation: bounceIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -144,8 +143,8 @@ h1 {
 }
 
 .btn-lg {
-  padding: 20px 32px;
-  font-size: 22px;
+  padding: 16px 28px;
+  font-size: 20px;
 }
 
 .btn-sm {
@@ -166,9 +165,9 @@ h1 {
 
 input[type="text"] {
   width: 100%;
-  padding: 16px 20px;
+  padding: 12px 16px;
   border: 2px solid #ddd;
-  border-radius: 14px;
+  border-radius: 12px;
   background: #f5f5f5;
   color: var(--text);
   font-size: 18px;
@@ -191,11 +190,11 @@ input:focus {
 .chip-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .chip {
-  padding: 10px 18px;
+  padding: 8px 14px;
   border-radius: 100px;
   border: 2px solid #ddd;
   background: #fff;
@@ -221,33 +220,33 @@ input:focus {
 
 .setup-header {
   text-align: center;
-  padding: 8px 0 20px;
+  padding: 0 0 10px;
 }
 
 .setup-header h1 {
   color: #fff;
-  font-size: 40px;
+  font-size: 36px;
 }
 
 .setup-header .subtitle {
   color: rgba(255,255,255,0.5);
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .setup-card {
   background: var(--card);
   border-radius: var(--radius);
-  padding: 24px;
+  padding: 16px;
   box-shadow: var(--shadow-sm);
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   color: var(--text);
 }
 
 .setup-card .how-to {
-  font-size: 14px;
-  line-height: 1.8;
+  font-size: 13px;
+  line-height: 1.6;
   color: var(--text-dim);
 }
 

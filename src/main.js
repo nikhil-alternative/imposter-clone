@@ -1,5 +1,7 @@
 import './style.css'
+import './analytics.js'
 import { categories } from './words.js'
+import { SUPABASE_URL, SUPABASE_KEY } from './supabase.js'
 import {
   getState, initGame,
   advanceRoleReveal, advanceClueTurn, setAccused,
@@ -14,12 +16,11 @@ const $$ = (sel) => document.querySelectorAll(sel)
 function renderSetup() {
   const html = `
     <div class="screen active" id="screen-setup">
-      <div class="scroll">
-        <div class="setup-header">
-          <div style="font-size:24px;letter-spacing:6px;margin-bottom:4px;">👻 🔎 👀</div>
-          <h1>Imposter</h1>
-          <div class="subtitle">Find the ghost among us</div>
-        </div>
+      <div class="setup-header">
+        <div style="font-size:24px;letter-spacing:6px;margin-bottom:2px;">👻 🔎 👀</div>
+        <h1>Imposter</h1>
+        <div class="subtitle">Find the ghost among us</div>
+      </div>
 
         <div class="setup-card">
           <div class="label">👋 Players (3–6)</div>
@@ -55,7 +56,6 @@ function renderSetup() {
             4. Say one word about the secret word (out loud)<br/>
             5. Discuss &amp; vote out the Imposter!
           </div>
-        </div>
       </div>
       <div class="footer">
         <button class="btn btn-lg" id="btn-start">Start Game</button>
@@ -363,7 +363,6 @@ function renderReveal() {
 
 /* ---------- SCOREBOARD ---------- */
 function renderScoreboard() {
-  const s = getState()
   const scores = getAllScores()
   const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1])
   const medals = ['🥇', '🥈', '🥉']
@@ -393,6 +392,7 @@ function renderScoreboard() {
       </div>
       <div class="footer">
         <button class="btn btn-lg" id="btn-play-again-sb">Play Again</button>
+        <button class="btn btn-outline" id="btn-stats">Stats</button>
         <button class="btn btn-outline" id="btn-reset-scores">Reset Scores</button>
       </div>
     </div>
@@ -404,10 +404,51 @@ function renderScoreboard() {
     renderSetup()
   })
 
+  $('#btn-stats').addEventListener('click', renderStats)
+
   $('#btn-reset-scores').addEventListener('click', () => {
     resetScores()
     renderScoreboard()
   })
+}
+
+/* ---------- STATS ---------- */
+async function renderStats() {
+  let total = '...'
+  let error = false
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/visits?select=id`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    })
+    const data = await res.json()
+    total = data.length || 0
+  } catch {
+    error = true
+  }
+
+  const html = `
+    <div class="screen active" id="screen-stats">
+      <div class="sb-header">
+        <h1>Stats</h1>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+        <div style="font-size:56px;margin-bottom:12px;">📊</div>
+        <div style="font-size:18px;color:rgba(255,255,255,0.5);font-weight:600;">Total visits</div>
+        <div style="font-size:48px;font-weight:900;color:#fff;margin-top:4px;">
+          ${error ? '—' : total}
+        </div>
+      </div>
+      <div class="footer">
+        <button class="btn btn-lg" id="btn-back-sb">Back</button>
+      </div>
+    </div>
+  `
+  $('#app').innerHTML = html
+  $('#btn-back-sb').addEventListener('click', renderScoreboard)
 }
 
 renderSetup()

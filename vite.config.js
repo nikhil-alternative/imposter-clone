@@ -6,29 +6,42 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,json}']
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,json}'],
+        runtimeCaching: [
+          {
+            urlPattern: /\.(?:png|svg|ico)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'icons',
+              expiration: { maxEntries: 10 }
+            }
+          }
+        ]
       },
       manifest: {
         name: 'Imposter - Party Game',
         short_name: 'Imposter',
-        description: 'The party game of bluffing, guessing, and social deduction',
-        theme_color: '#1a1a2e',
-        background_color: '#1a1a2e',
+        description: 'Find the ghost among us',
+        theme_color: '#222',
+        background_color: '#222',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',
+        scope: '/',
+        id: '/',
         categories: ['games', 'entertainment', 'social'],
+        prefer_related_applications: false,
         icons: [
           {
-            src: '/icon-192.svg',
+            src: '/icon-192.png',
             sizes: '192x192',
-            type: 'image/svg+xml',
+            type: 'image/png',
             purpose: 'any maskable'
           },
           {
-            src: '/icon-512.svg',
+            src: '/icon-512.png',
             sizes: '512x512',
-            type: 'image/svg+xml',
+            type: 'image/png',
             purpose: 'any maskable'
           }
         ]
