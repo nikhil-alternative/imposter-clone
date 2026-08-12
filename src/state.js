@@ -7,6 +7,7 @@ let state = {
   secretWord: '',
   secretHint: '',
   imposterIndex: 0,
+  starterIndex: 0,
   round: 0,
   roleRevealIndex: 0,
   accusedIndex: -1
@@ -34,6 +35,7 @@ export function initGame(playerCount, category) {
   const { word, hint } = getRandomWord(category)
   const players = Array.from({ length: playerCount }, (_, i) => `Player ${i + 1}`)
   const imposterIndex = Math.floor(Math.random() * players.length)
+  const starterIndex = Math.floor(Math.random() * players.length)
 
   state = {
     phase: 'roleReveal',
@@ -42,6 +44,7 @@ export function initGame(playerCount, category) {
     secretWord: word,
     secretHint: hint,
     imposterIndex,
+    starterIndex,
     round: (state?.round || 0) + 1,
     roleRevealIndex: 0,
     accusedIndex: -1
@@ -53,7 +56,7 @@ export function advanceRoleReveal() {
     state.roleRevealIndex++
     return false
   }
-  state.phase = 'voting'
+  state.phase = 'starting'
   return true
 }
 

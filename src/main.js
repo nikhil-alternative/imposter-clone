@@ -28,7 +28,7 @@ const CATEGORY_EMOJI = {
   'Famous People': '⭐'
 }
 
-const VOTE_COLORS = ['#ff5c8a', '#00c2a8', '#ff9f43', '#8f6bff', '#4f9dff', '#ff6b4a']
+const VOTE_COLORS = ['#ff5c8a', '#00c2a8', '#ff9f43', '#8f6bff', '#4f9dff', '#ff6b4a', '#00b8d4', '#e84393', '#00b894', '#d63031']
 
 /* ---------- SETUP ---------- */
 function renderSetup() {
@@ -41,7 +41,7 @@ function renderSetup() {
       </div>
 
         <div class="setup-card">
-          <div class="label">👋 Players (3–6)</div>
+          <div class="label">👋 Players (3–10)</div>
           <div class="stepper">
             <button class="stepper-btn" id="btn-dec">−</button>
             <div class="stepper-value" id="player-count">3</div>
@@ -86,7 +86,7 @@ function bindSetupEvents() {
   function renderCount() {
     countEl.textContent = playerCount
     decBtn.disabled = playerCount <= 3
-    incBtn.disabled = playerCount >= 6
+    incBtn.disabled = playerCount >= 10
   }
 
   decBtn.addEventListener('click', () => {
@@ -96,7 +96,7 @@ function bindSetupEvents() {
   })
 
   incBtn.addEventListener('click', () => {
-    if (playerCount >= 6) return
+    if (playerCount >= 10) return
     playerCount++
     renderCount()
   })
@@ -191,11 +191,32 @@ function bindRoleReveal() {
   passBtn.addEventListener('click', () => {
     const done = advanceRoleReveal()
     if (done) {
-      renderVoting()
+      renderStarting()
     } else {
       renderRoleReveal()
     }
   })
+}
+
+/* ---------- WHO STARTS ---------- */
+function renderStarting() {
+  const s = getState()
+  const starter = s.players[s.starterIndex]
+
+  const html = `
+    <div class="screen active" id="screen-starting">
+      <div class="starting-scene">
+        <div class="starting-icon">🎤</div>
+        <div class="starting-name">${starter} starts!</div>
+        <div class="starting-sub">Pass the phone to ${starter} to begin the discussion</div>
+        <button class="btn btn-lg mt-16" id="btn-start-vote" style="max-width:280px;">
+          🎯 Start Voting
+        </button>
+      </div>
+    </div>
+  `
+  $('#app').innerHTML = html
+  $('#btn-start-vote').addEventListener('click', renderVoting)
 }
 
 /* ---------- VOTING ---------- */

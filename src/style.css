@@ -416,6 +416,36 @@ h1 {
   color: var(--pink);
 }
 
+/* ---------- WHO STARTS ---------- */
+.starting-scene {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+}
+
+.starting-icon {
+  font-size: 84px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.starting-name {
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.starting-sub {
+  font-size: 17px;
+  color: var(--ink-soft);
+  font-weight: 500;
+  max-width: 300px;
+  line-height: 1.5;
+}
+
 /* ---------- VOTING ---------- */
 .vote-scene {
   flex: 1;
@@ -639,5 +669,7 @@ h1 {
   .role-word { font-size: 38px; }
   .reveal-value { font-size: 30px; }
   .role-avatar { font-size: 60px; }
+  .starting-icon { font-size: 60px; }
+  .starting-name { font-size: 30px; }
   .setup-header h1 { font-size: 32px; }
 }
