@@ -1,12 +1,11 @@
 import { getRandomWord } from './words.js'
 
-const STORAGE_SCORES = 'imposter_scores'
-
 let state = {
   phase: 'setup',
   players: [],
   category: 'mixed',
   secretWord: '',
+  secretHint: '',
   imposterIndex: 0,
   round: 0,
   roleRevealIndex: 0,
@@ -14,22 +13,7 @@ let state = {
   accusedIndex: -1
 }
 
-let scores = loadScores()
-
-function loadScores() {
-  try {
-    const raw = localStorage.getItem(STORAGE_SCORES)
-    return raw ? JSON.parse(raw) : {}
-  } catch {
-    return {}
-  }
-}
-
-function saveScores() {
-  try {
-    localStorage.setItem(STORAGE_SCORES, JSON.stringify(scores))
-  } catch {}
-}
+let scores = {}
 
 export function getAllScores() {
   return { ...scores }
@@ -37,27 +21,27 @@ export function getAllScores() {
 
 export function addScore(name, points = 1) {
   scores[name] = (scores[name] || 0) + points
-  saveScores()
 }
 
 export function resetScores() {
   scores = {}
-  saveScores()
 }
 
 export function getState() {
   return state
 }
 
-export function initGame(players, category) {
-  const secretWord = getRandomWord(category)
+export function initGame(playerCount, category) {
+  const { word, hint } = getRandomWord(category)
+  const players = Array.from({ length: playerCount }, (_, i) => `Player ${i + 1}`)
   const imposterIndex = Math.floor(Math.random() * players.length)
 
   state = {
     phase: 'roleReveal',
-    players: [...players],
+    players,
     category,
-    secretWord,
+    secretWord: word,
+    secretHint: hint,
     imposterIndex,
     round: (state?.round || 0) + 1,
     roleRevealIndex: 0,

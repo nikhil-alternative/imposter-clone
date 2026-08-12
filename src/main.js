@@ -1,3 +1,6 @@
+import '@fontsource/fredoka/latin-400.css'
+import '@fontsource/fredoka/latin-500.css'
+import '@fontsource/fredoka/latin-700.css'
 import './style.css'
 import './analytics.js'
 import { categories } from './words.js'
@@ -12,6 +15,21 @@ import {
 const $ = (sel) => document.querySelector(sel)
 const $$ = (sel) => document.querySelectorAll(sel)
 
+const CATEGORY_EMOJI = {
+  mixed: '🎲',
+  Animals: '🐾',
+  'Food & Drink': '🍕',
+  Countries: '🌍',
+  Movies: '🎬',
+  Sports: '⚽',
+  Hobbies: '🎨',
+  Objects: '🧸',
+  Nature: '🌿',
+  'Famous People': '⭐'
+}
+
+const VOTE_COLORS = ['#ff5c8a', '#00c2a8', '#ff9f43', '#8f6bff', '#4f9dff', '#ff6b4a']
+
 /* ---------- SETUP ---------- */
 function renderSetup() {
   const html = `
@@ -24,25 +42,19 @@ function renderSetup() {
 
         <div class="setup-card">
           <div class="label">👋 Players (3–6)</div>
-          <div id="player-inputs" class="flex flex-col gap-8">
-            <div class="flex gap-8 items-center">
-              <input type="text" id="pname-0" class="grow" placeholder="Player 1" maxlength="16" autocomplete="off" />
-              <button class="btn btn-sm" id="add-player" style="width:52px;padding:0;">+</button>
-            </div>
-            <input type="text" id="pname-1" placeholder="Player 2" maxlength="16" autocomplete="off" />
-            <input type="text" id="pname-2" placeholder="Player 3" maxlength="16" autocomplete="off" />
-          </div>
-          <div id="player-error" class="mt-8" style="font-size:14px;display:none;color:var(--accent);font-weight:700;">
-            Need at least 3 players!
+          <div class="stepper">
+            <button class="stepper-btn" id="btn-dec">−</button>
+            <div class="stepper-value" id="player-count">3</div>
+            <button class="stepper-btn" id="btn-inc">+</button>
           </div>
         </div>
 
         <div class="setup-card">
           <div class="label">📂 Category</div>
           <div id="category-chips" class="chip-group">
-            <button class="chip selected" data-cat="mixed">Mixed</button>
+            <button class="chip selected" data-cat="mixed">${CATEGORY_EMOJI.mixed} Mixed</button>
             ${Object.keys(categories).map(c =>
-              `<button class="chip" data-cat="${c}">${c}</button>`
+              `<button class="chip" data-cat="${c}">${CATEGORY_EMOJI[c] || '🎴'} ${c}</button>`
             ).join('')}
           </div>
         </div>
@@ -50,9 +62,9 @@ function renderSetup() {
         <div class="setup-card">
           <div class="how-to">
             <strong>How to Play</strong><br/>
-            1. Enter names &amp; pick a category<br/>
+            1. Set the player count &amp; pick a category<br/>
             2. Pass the phone — each player secretly sees their role<br/>
-            3. One player is the <strong style="color:var(--accent);">Imposter 👻</strong><br/>
+            3. One player is the <strong style="color:var(--pink);">Imposter 👻</strong><br/>
             4. Say one word about the secret word (out loud)<br/>
             5. Discuss &amp; vote out the Imposter!
           </div>
@@ -68,44 +80,29 @@ function renderSetup() {
 
 function bindSetupEvents() {
   let playerCount = 3
-  const container = $('#player-inputs')
-  const addBtn = $('#add-player')
-  const errEl = $('#player-error')
+  const countEl = $('#player-count')
+  const decBtn = $('#btn-dec')
+  const incBtn = $('#btn-inc')
 
-  function getNames() {
-    const names = []
-    container.querySelectorAll('input').forEach(inp => {
-      const v = inp.value.trim()
-      if (v) names.push(v)
-    })
-    return names
+  function renderCount() {
+    countEl.textContent = playerCount
+    decBtn.disabled = playerCount <= 3
+    incBtn.disabled = playerCount >= 6
   }
 
-  function validate() {
-    const names = getNames()
-    const valid = names.length >= 3
-    errEl.style.display = valid ? 'none' : 'block'
-    return valid
-  }
+  decBtn.addEventListener('click', () => {
+    if (playerCount <= 3) return
+    playerCount--
+    renderCount()
+  })
 
-  addBtn.addEventListener('click', () => {
+  incBtn.addEventListener('click', () => {
     if (playerCount >= 6) return
     playerCount++
-    const input = document.createElement('input')
-    input.type = 'text'
-    input.id = `pname-${playerCount - 1}`
-    input.placeholder = `Player ${playerCount}`
-    input.maxLength = 16
-    input.autocomplete = 'off'
-    input.addEventListener('input', validate)
-    container.appendChild(input)
-    if (playerCount >= 6) addBtn.style.display = 'none'
-    validate()
+    renderCount()
   })
 
-  container.querySelectorAll('input').forEach(inp => {
-    inp.addEventListener('input', validate)
-  })
+  renderCount()
 
   let selectedCat = 'mixed'
   const chips = $$('#category-chips .chip')
@@ -118,9 +115,7 @@ function bindSetupEvents() {
   })
 
   $('#btn-start').addEventListener('click', () => {
-    if (!validate()) return
-    const names = getNames()
-    initGame(names, selectedCat)
+    initGame(playerCount, selectedCat)
     renderRoleReveal()
   })
 }
@@ -157,9 +152,9 @@ function renderRoleReveal() {
             <div class="role-word ${isImposter ? 'imposter' : 'crew'}">
               ${isImposter ? 'IMPOSTER' : s.secretWord}
             </div>
-            <div class="role-hint">
+            <div class="role-hint ${isImposter ? 'role-hint-imposter' : ''}">
               ${isImposter
-                ? `The word is about <strong>${s.category}</strong>. Blend in! 👻`
+                ? `Hint: <strong>${s.secretHint}</strong> — blend in! 👻`
                 : 'Keep the word secret! 👀'
               }
             </div>
@@ -219,7 +214,7 @@ function renderCluePhase() {
           <div class="clue-prompt">
             Say <strong>one word</strong> related to the secret word
           </div>
-          <div style="font-size:14px;color:rgba(255,255,255,0.4);font-weight:600;margin-top:8px;">
+          <div style="font-size:14px;color:var(--ink-soft);font-weight:600;margin-top:8px;">
             Player ${s.clueTurnIndex + 1} of ${s.players.length}
           </div>
           <button class="btn btn-lg mt-16" id="btn-next-clue" style="max-width:280px;">
@@ -231,7 +226,7 @@ function renderCluePhase() {
           <div class="clue-done">
             <div class="clue-done-icon">🗣️</div>
             <div class="clue-done-text">All clues given</div>
-            <p style="color:rgba(255,255,255,0.5);font-size:16px;font-weight:600;max-width:260px;line-height:1.5;">
+            <p style="color:var(--ink-soft);font-size:16px;font-weight:600;max-width:260px;line-height:1.5;">
               Discuss who sounds suspicious, then vote!
             </p>
           </div>
@@ -273,7 +268,7 @@ function renderVoting() {
         <div class="vote-sub">Tap the name you're accusing</div>
         <div class="vote-grid">
           ${s.players.map((p, i) => `
-            <button class="vote-btn" data-target="${i}">
+            <button class="vote-btn" data-target="${i}" style="background:${VOTE_COLORS[i % VOTE_COLORS.length]};">
               <span class="vnum">#${i + 1}</span>
               <span>${p}</span>
             </button>
@@ -314,19 +309,19 @@ function renderReveal() {
   const html = `
     <div class="screen active" id="screen-reveal">
       <div class="reveal-scene">
-        <div class="reveal-card">
+        <div class="reveal-card imposter-card">
           <div class="reveal-label">👻 The Imposter</div>
           <div class="reveal-value imposter">${imposterName}</div>
         </div>
 
-        <div class="reveal-card">
+        <div class="reveal-card word-card">
           <div class="reveal-label">🔑 Secret Word</div>
           <div class="reveal-value word">${s.secretWord}</div>
         </div>
 
-        <div class="reveal-card">
+        <div class="reveal-card verdict-card">
           <div class="reveal-verdict win">${verdictIcon} ${verdictText}</div>
-          <div class="mt-8" style="font-size:15px;color:var(--text-dim);font-weight:600;">
+          <div class="mt-8" style="font-size:15px;color:var(--ink-soft);font-weight:600;">
             ${result.isCorrect
               ? `${accusedName} was voted out!`
               : `${accusedName} was wrong — the Imposter got away!`
@@ -375,7 +370,7 @@ function renderScoreboard() {
         </div>
 
         ${sorted.length === 0 ? `
-          <div style="text-align:center;padding:40px 0;color:rgba(255,255,255,0.4);font-size:18px;font-weight:700;">
+          <div style="text-align:center;padding:40px 0;color:var(--ink-soft);font-size:18px;font-weight:700;">
             No scores yet. Play a round!
           </div>
         ` : `
@@ -437,8 +432,8 @@ async function renderStats() {
       </div>
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
         <div style="font-size:56px;margin-bottom:12px;">📊</div>
-        <div style="font-size:18px;color:rgba(255,255,255,0.5);font-weight:600;">Total visits</div>
-        <div style="font-size:48px;font-weight:900;color:#fff;margin-top:4px;">
+        <div style="font-size:18px;color:var(--ink-soft);font-weight:600;">Total visits</div>
+        <div style="font-size:48px;font-weight:700;color:var(--ink);margin-top:4px;">
           ${error ? '—' : total}
         </div>
       </div>
