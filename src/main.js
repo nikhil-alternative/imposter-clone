@@ -7,7 +7,7 @@ import { categories } from './words.js'
 import { SUPABASE_URL, SUPABASE_KEY } from './supabase.js'
 import {
   getState, initGame,
-  advanceRoleReveal, advanceClueTurn, setAccused,
+  advanceRoleReveal, setAccused,
   getRevealResult, goToSetup,
   getAllScores, addScore, resetScores
 } from './state.js'
@@ -65,8 +65,7 @@ function renderSetup() {
             1. Set the player count &amp; pick a category<br/>
             2. Pass the phone — each player secretly sees their role<br/>
             3. One player is the <strong style="color:var(--pink);">Imposter 👻</strong><br/>
-            4. Say one word about the secret word (out loud)<br/>
-            5. Discuss &amp; vote out the Imposter!
+            4. Discuss &amp; vote out the Imposter!
           </div>
       </div>
       <div class="footer">
@@ -192,69 +191,11 @@ function bindRoleReveal() {
   passBtn.addEventListener('click', () => {
     const done = advanceRoleReveal()
     if (done) {
-      renderCluePhase()
+      renderVoting()
     } else {
       renderRoleReveal()
     }
   })
-}
-
-/* ---------- CLUE PHASE ---------- */
-function renderCluePhase() {
-  const s = getState()
-  const player = s.players[s.clueTurnIndex]
-  const allDone = s.phase !== 'cluePhase'
-
-  const html = `
-    <div class="screen active" id="screen-cluePhase">
-      ${!allDone ? `
-        <div class="clue-scene">
-          <div class="clue-icon">🔎</div>
-          <div class="clue-player-name">${player}</div>
-          <div class="clue-prompt">
-            Say <strong>one word</strong> related to the secret word
-          </div>
-          <div style="font-size:14px;color:var(--ink-soft);font-weight:600;margin-top:8px;">
-            Player ${s.clueTurnIndex + 1} of ${s.players.length}
-          </div>
-          <button class="btn btn-lg mt-16" id="btn-next-clue" style="max-width:280px;">
-            Done! Next →
-          </button>
-        </div>
-      ` : `
-        <div class="clue-scene">
-          <div class="clue-done">
-            <div class="clue-done-icon">🗣️</div>
-            <div class="clue-done-text">All clues given</div>
-            <p style="color:var(--ink-soft);font-size:16px;font-weight:600;max-width:260px;line-height:1.5;">
-              Discuss who sounds suspicious, then vote!
-            </p>
-          </div>
-          <button class="btn btn-lg" id="btn-go-vote" style="max-width:280px;">
-            🎯 Vote Now
-          </button>
-        </div>
-      `}
-    </div>
-  `
-  $('#app').innerHTML = html
-  bindCluePhase()
-}
-
-function bindCluePhase() {
-  const s = getState()
-  const allDone = s.phase !== 'cluePhase'
-
-  if (!allDone) {
-    $('#btn-next-clue').addEventListener('click', () => {
-      advanceClueTurn()
-      renderCluePhase()
-    })
-  } else {
-    $('#btn-go-vote').addEventListener('click', () => {
-      renderVoting()
-    })
-  }
 }
 
 /* ---------- VOTING ---------- */

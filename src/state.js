@@ -9,7 +9,6 @@ let state = {
   imposterIndex: 0,
   round: 0,
   roleRevealIndex: 0,
-  clueTurnIndex: 0,
   accusedIndex: -1
 }
 
@@ -45,7 +44,6 @@ export function initGame(playerCount, category) {
     imposterIndex,
     round: (state?.round || 0) + 1,
     roleRevealIndex: 0,
-    clueTurnIndex: 0,
     accusedIndex: -1
   }
 }
@@ -53,16 +51,6 @@ export function initGame(playerCount, category) {
 export function advanceRoleReveal() {
   if (state.roleRevealIndex < state.players.length - 1) {
     state.roleRevealIndex++
-    return false
-  }
-  state.phase = 'cluePhase'
-  state.clueTurnIndex = 0
-  return true
-}
-
-export function advanceClueTurn() {
-  if (state.clueTurnIndex < state.players.length - 1) {
-    state.clueTurnIndex++
     return false
   }
   state.phase = 'voting'
