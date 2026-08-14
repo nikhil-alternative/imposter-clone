@@ -665,12 +665,18 @@ h1 {
 .mt-16 { margin-top: 16px; }
 
 /* ---------- HOME ---------- */
+#btn-offline, #btn-online {
+  flex-direction: column;
+}
+
 .btn-sub {
   display: block;
   font-size: 13px;
   font-weight: 500;
   opacity: 0.9;
-  margin-top: 6px;
+  margin-top: 8px;
+  white-space: normal;
+  line-height: 1.25;
 }
 
 .chat-badge {
