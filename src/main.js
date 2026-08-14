@@ -52,6 +52,9 @@ let online = null
 let subs = []
 let chatMessages = []
 let chatOpen = false
+let chatUnread = 0
+let chatSeenAt = null
+let chatSeenInit = false
 let heartbeatTimer = null
 let wakeSentinel = null
 
@@ -133,6 +136,9 @@ function mySeatOf(state) {
 function startOnlineRoom() {
   cleanup()
   closeChat()
+  chatUnread = 0
+  chatSeenAt = null
+  chatSeenInit = false
   const args = { sessionId: rt.getSessionId(), roomId: online.roomId }
   let lastPhase = null
 
@@ -156,6 +162,18 @@ function startOnlineRoom() {
   subscribe(rt.api.chat.listMessages, args, (msgs) => {
     chatMessages = msgs || []
     renderChatMessages()
+    if (!chatSeenInit) {
+      chatSeenInit = true
+      const last = chatMessages[chatMessages.length - 1]
+      chatSeenAt = last ? last.ts : Date.now()
+    } else if (chatOpen) {
+      chatUnread = 0
+      chatSeenAt = Date.now()
+    } else {
+      const me = rt.getSessionId()
+      chatUnread = chatMessages.filter((m) => m.ts > chatSeenAt && m.sessionId !== me && m.kind !== 'system').length
+    }
+    updateChatBadge()
   })
 
   startHeartbeat()
@@ -417,6 +435,7 @@ function renderOnlineLobby(state) {
   $('#btn-chat').addEventListener('click', openChat)
   $('#btn-leave').addEventListener('click', leaveRoom)
 
+  updateChatBadge()
   updateLobbyState(state)
 }
 
@@ -574,6 +593,7 @@ function renderOnlineStarting(state) {
   })
 
   $('#btn-chat').addEventListener('click', openChat)
+  updateChatBadge()
 }
 
 /* ---------- ONLINE VOTING ---------- */
@@ -603,6 +623,7 @@ function renderOnlineVoting(state) {
   }
 
   $('#btn-chat').addEventListener('click', openChat)
+  updateChatBadge()
   updateVoting(state)
 }
 
@@ -698,13 +719,33 @@ function renderOnlineReveal(state) {
     })
   }
   $('#btn-chat-reveal').addEventListener('click', openChat)
+  updateChatBadge()
 }
 
 /* ---------- CHAT ---------- */
 
+function updateChatBadge() {
+  const btn = document.querySelector('#btn-chat, #btn-chat-reveal')
+  if (!btn) return
+  let badge = btn.querySelector('.chat-badge')
+  if (chatUnread > 0) {
+    if (!badge) {
+      badge = document.createElement('span')
+      badge.className = 'chat-badge'
+      btn.appendChild(badge)
+    }
+    badge.textContent = chatUnread > 99 ? '99+' : String(chatUnread)
+  } else if (badge) {
+    badge.remove()
+  }
+}
+
 function openChat() {
   if (chatOpen) return
   chatOpen = true
+  chatUnread = 0
+  chatSeenAt = Date.now()
+  updateChatBadge()
   const wrap = document.createElement('div')
   wrap.id = 'chat-overlay'
   wrap.className = 'chat-overlay'
