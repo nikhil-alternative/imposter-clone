@@ -15,6 +15,7 @@ export default defineSchema({
     starterSeat: v.optional(v.number()),
     accusedSeat: v.optional(v.number()),
     round: v.number(),
+    recentWords: v.optional(v.array(v.string())),
     createdAt: v.number(),
   }).index("by_code", ["code"]),
 

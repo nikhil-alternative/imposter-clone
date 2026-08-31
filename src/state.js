@@ -1,4 +1,24 @@
-import { getRandomWord } from './words.js'
+import { getRandomWord, RECENT_LIMIT } from './words.js'
+
+const RECENT_KEY = 'imposter_recent_words'
+
+function loadRecent() {
+  try {
+    const raw = localStorage.getItem(RECENT_KEY)
+    const arr = raw ? JSON.parse(raw) : []
+    return Array.isArray(arr) ? arr.filter((w) => typeof w === 'string') : []
+  } catch {
+    return []
+  }
+}
+
+function saveRecent(words) {
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(words))
+  } catch {
+    /* ignore storage errors */
+  }
+}
 
 let state = {
   phase: 'setup',
@@ -32,7 +52,9 @@ export function getState() {
 }
 
 export function initGame(playerCount, category) {
-  const { word, hint } = getRandomWord(category)
+  const recent = loadRecent()
+  const { word, hint } = getRandomWord(category, recent)
+  saveRecent([...recent, word].slice(-RECENT_LIMIT))
   const players = Array.from({ length: playerCount }, (_, i) => `Player ${i + 1}`)
   const imposterIndex = Math.floor(Math.random() * players.length)
   const starterIndex = Math.floor(Math.random() * players.length)

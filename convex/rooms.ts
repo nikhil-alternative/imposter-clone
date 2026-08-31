@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -95,7 +95,12 @@ export const joinRoom = mutation({
       return { code: room.code, seat: existing.seat, roomId: room._id };
     }
 
-    if (room.phase !== "lobby") throw new Error("That game already started");
+    if (room.phase !== "lobby") {
+      throw new ConvexError({
+        code: "GAME_STARTED",
+        message: "This game has already started. You can only join before the game begins.",
+      });
+    }
 
     if (room.hasPassword && room.password !== password?.trim()) {
       throw new Error("Wrong password");

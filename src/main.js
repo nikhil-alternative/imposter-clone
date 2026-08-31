@@ -43,7 +43,14 @@ function escapeHtml(str) {
 }
 
 function errMsg(err) {
-  return err?.message || 'Something went wrong'
+  if (err?.data) {
+    if (typeof err.data === 'string') return err.data
+    if (err.data.message) return err.data.message
+    if (err.data.code) return err.data.code
+  }
+  const clean = (err?.message || 'Something went wrong').split('\n')[0]
+    .replace(/^\[CONVEX [^\]]*\]\s*/, '')
+  return clean || 'Something went wrong'
 }
 
 /* ---------- ONLINE HELPERS ---------- */
@@ -240,8 +247,13 @@ function renderHome() {
         online = { sessionId: rt.getSessionId(), alias: savedRoom.alias, code: res.code, roomId: res.roomId }
         rt.saveRoom(online)
         startOnlineRoom()
-      }).catch(() => {
-        rt.clearRoom()
+      }).catch((e) => {
+        if (e?.data?.code === 'GAME_STARTED') {
+          rt.clearRoom()
+          alert('This game has already started. You can only join before the game begins.')
+        } else {
+          alert(errMsg(e))
+        }
         renderOnlineMenu()
       })
     } else {
@@ -532,7 +544,7 @@ function renderOnlineRoleReveal(state) {
       if (isHost) {
         $('#btn-advance').style.display = 'flex'
       }
-    }, 1500)
+    }, 800)
   })
 
   $('#btn-advance').style.display = 'none'
@@ -858,6 +870,7 @@ function leaveRoom() {
 
 /* ---------- SETUP (offline) ---------- */
 function renderSetup() {
+  const savedCat = loadCategory()
   const html = `
     <div class="screen active" id="screen-setup">
       <div class="setup-header">
@@ -879,9 +892,9 @@ function renderSetup() {
         <div class="setup-card">
           <div class="label">📂 Category</div>
           <div id="category-chips" class="chip-group">
-            <button class="chip selected" data-cat="mixed">${CATEGORY_EMOJI.mixed} Mixed</button>
+            <button class="chip ${savedCat === 'mixed' ? 'selected' : ''}" data-cat="mixed">${CATEGORY_EMOJI.mixed} Mixed</button>
             ${Object.keys(categories).map(c =>
-              `<button class="chip" data-cat="${c}">${CATEGORY_EMOJI[c] || '🎴'} ${c}</button>`
+              `<button class="chip ${savedCat === c ? 'selected' : ''}" data-cat="${c}">${CATEGORY_EMOJI[c] || '🎴'} ${c}</button>`
             ).join('')}
           </div>
         </div>
@@ -906,8 +919,40 @@ function renderSetup() {
   bindSetupEvents()
 }
 
+const PLAYER_COUNT_KEY = 'imposter_player_count'
+
+function loadPlayerCount() {
+  try {
+    const raw = parseInt(localStorage.getItem(PLAYER_COUNT_KEY), 10)
+    if (Number.isInteger(raw) && raw >= 3 && raw <= 10) return raw
+  } catch { /* ignore */ }
+  return 3
+}
+
+function savePlayerCount(count) {
+  try {
+    localStorage.setItem(PLAYER_COUNT_KEY, String(count))
+  } catch { /* ignore */ }
+}
+
+const CATEGORY_KEY = 'imposter_category'
+
+function loadCategory() {
+  try {
+    const raw = localStorage.getItem(CATEGORY_KEY)
+    if (raw && (raw === 'mixed' || categories[raw])) return raw
+  } catch { /* ignore */ }
+  return 'mixed'
+}
+
+function saveCategory(cat) {
+  try {
+    localStorage.setItem(CATEGORY_KEY, cat)
+  } catch { /* ignore */ }
+}
+
 function bindSetupEvents() {
-  let playerCount = 3
+  let playerCount = loadPlayerCount()
   const countEl = $('#player-count')
   const decBtn = $('#btn-dec')
   const incBtn = $('#btn-inc')
@@ -921,24 +966,27 @@ function bindSetupEvents() {
   decBtn.addEventListener('click', () => {
     if (playerCount <= 3) return
     playerCount--
+    savePlayerCount(playerCount)
     renderCount()
   })
 
   incBtn.addEventListener('click', () => {
     if (playerCount >= 10) return
     playerCount++
+    savePlayerCount(playerCount)
     renderCount()
   })
 
   renderCount()
 
-  let selectedCat = 'mixed'
+  let selectedCat = loadCategory()
   const chips = $$('#category-chips .chip')
   chips.forEach(chip => {
     chip.addEventListener('click', () => {
       chips.forEach(c => c.classList.remove('selected'))
       chip.classList.add('selected')
       selectedCat = chip.dataset.cat
+      saveCategory(selectedCat)
     })
   })
 
@@ -1014,7 +1062,7 @@ function bindRoleReveal() {
       wordWrap.style.animation = 'none'
       void wordWrap.offsetHeight
       wordWrap.style.animation = ''
-    }, 1500)
+    }, 800)
   })
 
   passBtn.addEventListener('click', () => {

@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { getRandomWord } from "./words";
+import { getRandomWord, RECENT_LIMIT } from "./words";
 
 async function getPlayers(ctx, roomId) {
   const players = await ctx.db
@@ -49,7 +49,8 @@ export const startGame = mutation({
     const players = await getPlayers(ctx, roomId);
     if (players.length < 3) throw new Error("Need at least 3 players");
 
-    const { word, hint } = getRandomWord(category);
+    const recentWords = room.recentWords || [];
+    const { word, hint } = getRandomWord(category, recentWords);
     const imposterSeat = players[Math.floor(Math.random() * players.length)].seat;
     const starterSeat = players[Math.floor(Math.random() * players.length)].seat;
 
@@ -73,6 +74,7 @@ export const startGame = mutation({
       starterSeat,
       accusedSeat: undefined,
       round: (room.round || 0) + 1,
+      recentWords: [...recentWords, word].slice(-RECENT_LIMIT),
     });
 
     await ctx.db.insert("messages", {
