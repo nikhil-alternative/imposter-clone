@@ -24,6 +24,57 @@
   --radius-sm: 18px;
   --shadow: 0 10px 0 rgba(0, 0, 0, 0.15);
   --shadow-sm: 0 6px 0 rgba(0, 0, 0, 0.12);
+  --line: #d9ecff;
+  --pink-tint: #fff5f7;
+  --card-soft: #f4fbff;
+  --muted-bg: #c9d4ea;
+  --muted-dark: #a9b8d6;
+}
+
+body[data-theme="bubblegum"] {
+  --ink: #7c3a63;
+  --ink-soft: #c285a8;
+  --bg-top: #ffc3e0;
+  --bg-bottom: #fff0f8;
+  --card: #ffffff;
+  --pink: #ff5c9d;
+  --pink-dark: #d63d7d;
+  --orange: #ffb35c;
+  --orange-dark: #e08a2e;
+  --teal: #00b8a9;
+  --teal-dark: #009988;
+  --purple: #a06bff;
+  --purple-dark: #8147d6;
+  --blue: #5aa8ff;
+  --yellow: #ffd066;
+  --line: #ffd9ec;
+  --pink-tint: #fff0f6;
+  --card-soft: #fff6fb;
+  --muted-bg: #ffd7ea;
+  --muted-dark: #d8a8c4;
+}
+
+body[data-theme="ocean"] {
+  --ink: #144a63;
+  --ink-soft: #5b8da3;
+  --bg-top: #6fd6e8;
+  --bg-bottom: #cdeef8;
+  --card: #ffffff;
+  --pink: #ff7aa2;
+  --pink-dark: #e5537e;
+  --orange: #ffb35c;
+  --orange-dark: #e08a2e;
+  --teal: #00cfb5;
+  --teal-dark: #00a894;
+  --purple: #9b7bff;
+  --purple-dark: #7a52d6;
+  --blue: #4f9dff;
+  --yellow: #ffd666;
+  --line: #bfe4f0;
+  --pink-tint: #eefcff;
+  --card-soft: #f4fbfe;
+  --muted-bg: #cfe5ee;
+  --muted-dark: #9fb8c4;
 }
 
 html, body {
@@ -194,10 +245,51 @@ h1 {
   margin-top: 2px;
 }
 
+/* ---------- THEME PICKER ---------- */
+.theme-row {
+  padding: 0 24px;
+}
+.theme-label {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+}
+.theme-swatches {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+}
+.theme-swatch {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 3px solid var(--line);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.theme-swatch:active { transform: scale(0.94); }
+.theme-swatch.active {
+  border-color: var(--pink);
+  box-shadow: 0 0 0 3px rgba(255, 92, 138, 0.3), var(--shadow-sm);
+  transform: scale(1.08);
+}
+.theme-swatch[data-theme="sky"]      { background: linear-gradient(135deg, #8ed6f7, #d3f3ff); }
+.theme-swatch[data-theme="bubblegum"]{ background: linear-gradient(135deg, #ffc3e0, #fff0f8); }
+.theme-swatch[data-theme="ocean"]    { background: linear-gradient(135deg, #6fd6e8, #cdeef8); }
+
 .setup-card {
   background: var(--card);
   border-radius: var(--radius);
-  border: 3px solid #d9ecff;
+  border: 3px solid var(--line);
   padding: 16px;
   box-shadow: var(--shadow-sm);
   margin-bottom: 12px;
@@ -223,7 +315,7 @@ h1 {
 .chip {
   padding: 9px 15px;
   border-radius: 999px;
-  border: 3px solid #d9ecff;
+  border: 3px solid var(--line);
   background: #fff;
   color: var(--ink);
   font-size: 15px;
@@ -282,8 +374,8 @@ h1 {
 .stepper-btn:disabled {
   opacity: 0.35;
   transform: none;
-  background: #c9d4ea;
-  box-shadow: 0 6px 0 #a9b8d6;
+  background: var(--muted-bg);
+  box-shadow: 0 6px 0 var(--muted-dark);
   cursor: default;
 }
 
@@ -528,7 +620,7 @@ h1 {
 .reveal-card {
   background: #fff;
   border-radius: var(--radius);
-  border: 3px solid #d9ecff;
+  border: 3px solid var(--line);
   padding: 22px 20px;
   box-shadow: var(--shadow-sm);
   width: 100%;
@@ -598,7 +690,7 @@ h1 {
 
 .reveal-player.is-imposter {
   border: 4px solid var(--pink);
-  background: #fff5f7;
+  background: var(--pink-tint);
 }
 
 /* ---------- SCOREBOARD ---------- */
@@ -623,7 +715,7 @@ h1 {
   padding: 16px 20px;
   background: #fff;
   border-radius: var(--radius-sm);
-  border: 3px solid #d9ecff;
+  border: 3px solid var(--line);
   margin-bottom: 10px;
   box-shadow: var(--shadow-sm);
   color: var(--ink);
@@ -760,7 +852,7 @@ h1 {
   flex: 1;
   padding: 13px 0;
   border-radius: 999px;
-  border: 3px solid #d9ecff;
+  border: 3px solid var(--line);
   background: #fff;
   color: var(--ink-soft);
   font-size: 16px;
@@ -782,7 +874,7 @@ h1 {
 .online-card {
   background: var(--card);
   border-radius: var(--radius);
-  border: 3px solid #d9ecff;
+  border: 3px solid var(--line);
   padding: 18px 16px;
   box-shadow: var(--shadow-sm);
   color: var(--ink);
@@ -792,7 +884,7 @@ h1 {
   width: 100%;
   padding: 15px 16px;
   margin-bottom: 12px;
-  border: 3px solid #d9ecff;
+  border: 3px solid var(--line);
   border-radius: var(--radius-sm);
   font-family: inherit;
   font-size: 18px;
@@ -808,7 +900,7 @@ h1 {
 }
 
 .text-input::placeholder {
-  color: #a9b8d6;
+  color: var(--muted-dark);
 }
 
 .code-input {
@@ -838,7 +930,7 @@ h1 {
 
 .opt {
   font-size: 12px;
-  color: #a9b8d6;
+  color: var(--muted-dark);
 }
 
 .err {
@@ -921,8 +1013,8 @@ h1 {
   align-items: center;
   gap: 10px;
   padding: 11px 14px;
-  background: #f4fbff;
-  border: 2px solid #d9ecff;
+  background: var(--card-soft);
+  border: 2px solid var(--line);
   border-radius: var(--radius-sm);
   font-size: 17px;
   font-weight: 600;
@@ -938,7 +1030,7 @@ h1 {
   height: 12px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: #c9d4ea;
+  background: var(--muted-bg);
 }
 
 .presence-dot.on {
@@ -947,7 +1039,7 @@ h1 {
 }
 
 .presence-dot.off {
-  background: #c9d4ea;
+  background: var(--muted-bg);
 }
 
 .palias {
@@ -1156,7 +1248,7 @@ h1 {
 .dialog {
   background: #fff;
   border-radius: var(--radius);
-  border: 3px solid #d9ecff;
+  border: 3px solid var(--line);
   padding: 28px 24px 20px;
   max-width: 340px;
   width: calc(100% - 48px);
@@ -1253,7 +1345,7 @@ h1 {
 .chat-input {
   flex: 1;
   padding: 14px 16px;
-  border: 3px solid #d9ecff;
+  border: 3px solid var(--line);
   border-radius: 999px;
   font-family: inherit;
   font-size: 16px;

@@ -235,7 +235,9 @@ function updateOnlinePhase(state) {
 /* ---------- HOME ---------- */
 
 function renderHome() {
+  applyTheme(loadTheme())
   const saved = rt.getSavedRoom()
+  const currentTheme = loadTheme()
   const html = `
     <div class="screen active" id="screen-home">
       <div class="setup-header">
@@ -253,12 +255,26 @@ function renderHome() {
           <span class="btn-sub">${saved ? `Rejoin room ${saved.code}` : 'Create or join a room'}</span>
         </button>
       </div>
+      <div class="theme-row">
+        <div class="theme-label">🎨 Themes</div>
+        <div class="theme-swatches">
+          ${THEMES.map(t => `<button class="theme-swatch${t === currentTheme ? ' active' : ''}" data-theme="${t}">${THEME_LABELS[t]}</button>`).join('')}
+        </div>
+      </div>
       <div class="footer">
         <div class="home-foot">3–10 players · find the imposter!</div>
       </div>
     </div>
   `
   $('#app').innerHTML = html
+
+  document.querySelectorAll('.theme-swatch').forEach((el) => {
+    el.addEventListener('click', () => {
+      const key = el.dataset.theme
+      saveTheme(key)
+      applyTheme(key)
+    })
+  })
 
   $('#btn-offline').addEventListener('click', () => {
     goToSetup()
@@ -1006,6 +1022,31 @@ function saveCategory(cat) {
   try {
     localStorage.setItem(CATEGORY_KEY, cat)
   } catch { /* ignore */ }
+}
+
+const THEME_KEY = 'imposter_theme'
+const THEMES = ['sky', 'bubblegum', 'ocean']
+const THEME_LABELS = { sky: '☁️', bubblegum: '🍬', ocean: '🐠' }
+
+function loadTheme() {
+  try {
+    const raw = localStorage.getItem(THEME_KEY)
+    if (raw && THEMES.includes(raw)) return raw
+  } catch { /* ignore */ }
+  return 'sky'
+}
+
+function saveTheme(key) {
+  try {
+    localStorage.setItem(THEME_KEY, key)
+  } catch { /* ignore */ }
+}
+
+function applyTheme(key) {
+  document.body.dataset.theme = key === 'sky' ? '' : key
+  document.querySelectorAll('.theme-swatch').forEach((el) => {
+    el.classList.toggle('active', el.dataset.theme === key)
+  })
 }
 
 function bindSetupEvents() {
