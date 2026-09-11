@@ -3,7 +3,7 @@ import { mutation, query } from "./_generated/server";
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const CODE_LENGTH = 5;
-const MAX_PLAYERS = 10;
+const MAX_PLAYERS = 20;
 
 function generateCode() {
   let code = "";
@@ -106,7 +106,7 @@ export const joinRoom = mutation({
       throw new Error("Wrong password");
     }
 
-    if (players.length >= MAX_PLAYERS) throw new Error("Room is full (10 max)");
+    if (players.length >= MAX_PLAYERS) throw new Error("Room is full (20 max)");
     if (players.some((p) => p.alias.toLowerCase() === cleanAlias.toLowerCase())) {
       throw new Error("That alias is already taken");
     }

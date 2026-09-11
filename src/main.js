@@ -257,8 +257,12 @@ function renderHome() {
           <span class="btn-sub">One phone · pass &amp; play</span>
         </button>
         <button class="btn btn-lg btn-purple" id="btn-online">
-          🌐 Play Online
-          <span class="btn-sub">${saved ? `Rejoin room ${saved.code}` : 'Create or join a room'}</span>
+          💫 Play Online
+          <span class="btn-sub">Start a fresh game with friends</span>
+        </button>
+        <button class="btn btn-lg btn-orange" id="btn-rejoin">
+          🔁 Rejoin
+          <span class="btn-sub">${saved ? `Jump back into room ${saved.code}` : 'No game saved yet'}</span>
         </button>
       </div>
       <div class="theme-row">
@@ -268,7 +272,7 @@ function renderHome() {
         </div>
       </div>
       <div class="footer">
-        <div class="home-foot">3–10 players · find the imposter!</div>
+        <div class="home-foot">3–20 players · find the imposter!</div>
       </div>
     </div>
   `
@@ -288,41 +292,50 @@ function renderHome() {
   })
 
   $('#btn-online').addEventListener('click', () => {
+    renderOnlineMenu()
+  })
+
+  $('#btn-rejoin').addEventListener('click', () => {
     const savedRoom = rt.getSavedRoom()
-    if (savedRoom && savedRoom.code && savedRoom.roomId) {
+    if (!savedRoom || !savedRoom.code || !savedRoom.roomId) {
+      showDialog({
+        emoji: '🤷',
+        title: 'No game to rejoin yet!',
+        message: 'Start a new game first, then come back to jump in.'
+      })
+      return
+    }
       rt.call(rt.api.rooms.joinRoom, {
-        sessionId: savedRoom.sessionId || rt.getSessionId(),
-        alias: savedRoom.alias || 'Player',
-        code: savedRoom.code
-      }).then((res) => {
-        online = { sessionId: rt.getSessionId(), alias: savedRoom.alias, code: res.code, roomId: res.roomId }
-        rt.saveRoom(online)
-        startOnlineRoom()
-      }).catch((e) => {
-        if (e?.data?.code === 'GAME_STARTED') {
+      sessionId: savedRoom.sessionId || rt.getSessionId(),
+      alias: savedRoom.alias || 'Player',
+      code: savedRoom.code
+    }).then((res) => {
+      online = { sessionId: rt.getSessionId(), alias: savedRoom.alias, code: res.code, roomId: res.roomId }
+      rt.saveRoom(online)
+      startOnlineRoom()
+    }).catch((e) => {
+      if (e?.data?.code === 'GAME_STARTED') {
+        rt.clearRoom()
+        showDialog({
+          emoji: '⏰',
+          title: 'Game already started!',
+          message: 'Sorry — that room already started playing. You can only join before the game begins.'
+        })
+      } else {
+        const msg = errMsg(e)
+        if (msg === 'Room not found') {
           rt.clearRoom()
           showDialog({
-            emoji: '⏰',
-            title: 'Game already started!',
-            message: 'Sorry — that room already started playing. You can only join before the game begins.'
+            emoji: '🔍',
+            title: 'Hmm, wrong code?',
+            message: 'That code is invalid or expired, so the game may have ended. Ask your friend for a fresh code!'
           })
         } else {
-          const msg = errMsg(e)
-          if (msg === 'Room not found') {
-            showDialog({
-              emoji: '🔍',
-              title: 'Hmm, wrong code?',
-              message: 'No room found with that code. It may have been closed.'
-            })
-          } else {
-            showDialog({ emoji: '😕', title: "Couldn't join room", message: msg })
-          }
+          showDialog({ emoji: '😕', title: "Couldn't join room", message: msg })
         }
-        renderOnlineMenu()
-      })
-    } else {
-      renderOnlineMenu()
-    }
+      }
+      renderHome()
+    })
   })
 }
 
@@ -438,7 +451,7 @@ function renderOnlineMenu() {
         showDialog({
           emoji: '🔍',
           title: 'Hmm, wrong code?',
-          message: 'No room found with that code. Double-check and try again.'
+          message: 'That code is invalid or expired. Check it and try again — or ask your friend for the right code!'
         })
       } else {
         $('#err-join').textContent = msg
@@ -960,7 +973,7 @@ function renderSetup() {
       </div>
 
         <div class="setup-card">
-          <div class="label">👋 Players (3–10)</div>
+          <div class="label">👋 Players (3–20)</div>
           <div class="stepper">
             <button class="stepper-btn" id="btn-dec">−</button>
             <div class="stepper-value" id="player-count">3</div>
@@ -1003,7 +1016,7 @@ const PLAYER_COUNT_KEY = 'imposter_player_count'
 function loadPlayerCount() {
   try {
     const raw = parseInt(localStorage.getItem(PLAYER_COUNT_KEY), 10)
-    if (Number.isInteger(raw) && raw >= 3 && raw <= 10) return raw
+    if (Number.isInteger(raw) && raw >= 3 && raw <= 20) return raw
   } catch { /* ignore */ }
   return 3
 }
@@ -1064,7 +1077,7 @@ function bindSetupEvents() {
   function renderCount() {
     countEl.textContent = playerCount
     decBtn.disabled = playerCount <= 3
-    incBtn.disabled = playerCount >= 10
+    incBtn.disabled = playerCount >= 20
   }
 
   decBtn.addEventListener('click', () => {
@@ -1075,7 +1088,7 @@ function bindSetupEvents() {
   })
 
   incBtn.addEventListener('click', () => {
-    if (playerCount >= 10) return
+    if (playerCount >= 20) return
     playerCount++
     savePlayerCount(playerCount)
     renderCount()
