@@ -31,6 +31,12 @@ const CATEGORY_EMOJI = {
 
 const VOTE_COLORS = ['#ff5c8a', '#00c2a8', '#ff9f43', '#8f6bff', '#4f9dff', '#ff6b4a', '#00b8d4', '#e84393', '#00b894', '#d63031']
 
+function getVoteColor(i) {
+  const root = getComputedStyle(document.body)
+  const color = root.getPropertyValue(`--vote-${(i % 10) + 1}`).trim()
+  return color || VOTE_COLORS[i % VOTE_COLORS.length]
+}
+
 const CHAT_EMOJIS = ['😂', '😅', '🙈', '🤡', '👻', '😈', '😱', '🤫', '😤', '🥶', '🔥', '💀', '👍', '👏', '🤔', '😬', '😍', '🎉', '🍕', '🏆', '❓', '❤️']
 
 function escapeHtml(str) {
@@ -723,7 +729,7 @@ function updateVoting(state) {
   grid.innerHTML = state.players
     .filter((p) => p.seat !== mySeat)
     .map((p) => `
-      <button class="vote-btn ${voted ? 'voted' : ''}" data-target="${p.seat}" style="background:${VOTE_COLORS[(p.seat - 1) % VOTE_COLORS.length]};">
+      <button class="vote-btn ${voted ? 'voted' : ''}" data-target="${p.seat}" style="background:${getVoteColor(p.seat - 1)};">
         <span class="vnum">${voted ? '✓' : '#' + p.seat}</span>
         <span>${escapeHtml(p.alias)}</span>
       </button>
@@ -1205,7 +1211,7 @@ function renderVoting() {
         <div class="vote-sub">Tap the name you're accusing</div>
         <div class="vote-grid">
           ${s.players.map((p, i) => `
-            <button class="vote-btn" data-target="${i}" style="background:${VOTE_COLORS[i % VOTE_COLORS.length]};">
+            <button class="vote-btn" data-target="${i}" style="background:${getVoteColor(i)};">
               <span class="vnum">#${i + 1}</span>
               <span>${p}</span>
             </button>

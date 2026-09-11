@@ -29,6 +29,20 @@
   --card-soft: #f4fbff;
   --muted-bg: #c9d4ea;
   --muted-dark: #a9b8d6;
+  --deco-1: '☁️';
+  --deco-2: '🎈';
+  --deco-3: '⭐';
+  --chat-mine: #e3dbff;
+  --vote-1: #ff5c8a;
+  --vote-2: #00c2a8;
+  --vote-3: #ff9f43;
+  --vote-4: #8f6bff;
+  --vote-5: #4f9dff;
+  --vote-6: #ff6b4a;
+  --vote-7: #00b8d4;
+  --vote-8: #e84393;
+  --vote-9: #00b894;
+  --vote-10: #d63031;
 }
 
 body[data-theme="bubblegum"] {
@@ -52,6 +66,20 @@ body[data-theme="bubblegum"] {
   --card-soft: #fff6fb;
   --muted-bg: #ffd7ea;
   --muted-dark: #d8a8c4;
+  --deco-1: '🍬';
+  --deco-2: '🧁';
+  --deco-3: '🎀';
+  --chat-mine: #ffd6e8;
+  --vote-1: #ff5c9d;
+  --vote-2: #00b8a9;
+  --vote-3: #ffb35c;
+  --vote-4: #a06bff;
+  --vote-5: #5aa8ff;
+  --vote-6: #ff7aa8;
+  --vote-7: #00c9b8;
+  --vote-8: #e84393;
+  --vote-9: #7be0a9;
+  --vote-10: #9b5cd6;
 }
 
 body[data-theme="ocean"] {
@@ -75,6 +103,20 @@ body[data-theme="ocean"] {
   --card-soft: #f4fbfe;
   --muted-bg: #cfe5ee;
   --muted-dark: #9fb8c4;
+  --deco-1: '🐠';
+  --deco-2: '🐙';
+  --deco-3: '🐚';
+  --chat-mine: #cdeaf8;
+  --vote-1: #ff7aa2;
+  --vote-2: #00cfb5;
+  --vote-3: #ffb35c;
+  --vote-4: #9b7bff;
+  --vote-5: #4f9dff;
+  --vote-6: #ff9e6b;
+  --vote-7: #00b8d4;
+  --vote-8: #e86aa8;
+  --vote-9: #5ad9c0;
+  --vote-10: #3d7bd6;
 }
 
 html, body {
@@ -96,7 +138,7 @@ body {
 body::before,
 body::after,
 #app::before {
-  content: '☁️';
+  content: var(--deco-1);
   position: fixed;
   font-size: 56px;
   opacity: 0.45;
@@ -105,8 +147,8 @@ body::after,
   animation: float 4s ease-in-out infinite;
 }
 body::before { top: 6%; left: 4%; }
-body::after { content: '🎈'; top: 40%; right: 4%; font-size: 40px; animation-duration: 3.5s; }
-#app::before { content: '⭐'; bottom: 8%; left: 6%; font-size: 30px; animation-duration: 3s; }
+body::after { content: var(--deco-2); top: 40%; right: 4%; font-size: 40px; animation-duration: 3.5s; }
+#app::before { content: var(--deco-3); bottom: 8%; left: 6%; font-size: 30px; animation-duration: 3s; }
 
 #app {
   height: 100%;
@@ -1219,7 +1261,7 @@ h1 {
 }
 
 .chat-msg.mine .cm-sender {
-  color: #e3dbff;
+  color: var(--chat-mine);
 }
 
 .chat-msg .cm-body {
