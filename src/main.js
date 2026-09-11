@@ -53,6 +53,35 @@ function errMsg(err) {
   return clean || 'Something went wrong'
 }
 
+/* ---------- DIALOG ---------- */
+
+function showDialog({ emoji, title, message, button = 'Got it' }) {
+  const existing = document.getElementById('dialog-overlay')
+  if (existing) existing.remove()
+  const wrap = document.createElement('div')
+  wrap.id = 'dialog-overlay'
+  wrap.className = 'dialog-overlay'
+  wrap.innerHTML = `
+    <div class="dialog" role="dialog" aria-modal="true">
+      <div class="dialog-emoji">${escapeHtml(emoji)}</div>
+      <div class="dialog-title">${escapeHtml(title)}</div>
+      <div class="dialog-msg">${escapeHtml(message)}</div>
+      <button class="btn" id="dialog-ok">${escapeHtml(button)}</button>
+    </div>
+  `
+  document.body.appendChild(wrap)
+  const close = () => {
+    wrap.remove()
+    document.removeEventListener('keydown', onKey)
+  }
+  function onKey(e) {
+    if (e.key === 'Escape') close()
+  }
+  document.addEventListener('keydown', onKey)
+  wrap.addEventListener('click', (e) => { if (e.target === wrap) close() })
+  wrap.querySelector('#dialog-ok').addEventListener('click', close)
+}
+
 /* ---------- ONLINE HELPERS ---------- */
 
 let online = null
@@ -250,9 +279,22 @@ function renderHome() {
       }).catch((e) => {
         if (e?.data?.code === 'GAME_STARTED') {
           rt.clearRoom()
-          alert('This game has already started. You can only join before the game begins.')
+          showDialog({
+            emoji: '⏰',
+            title: 'Game already started!',
+            message: 'Sorry — that room already started playing. You can only join before the game begins.'
+          })
         } else {
-          alert(errMsg(e))
+          const msg = errMsg(e)
+          if (msg === 'Room not found') {
+            showDialog({
+              emoji: '🔍',
+              title: 'Hmm, wrong code?',
+              message: 'No room found with that code. It may have been closed.'
+            })
+          } else {
+            showDialog({ emoji: '😕', title: "Couldn't join room", message: msg })
+          }
         }
         renderOnlineMenu()
       })
@@ -363,7 +405,22 @@ function renderOnlineMenu() {
       rt.saveRoom(online)
       startOnlineRoom()
     } catch (e) {
-      $('#err-join').textContent = errMsg(e)
+      const msg = errMsg(e)
+      if (e?.data?.code === 'GAME_STARTED') {
+        showDialog({
+          emoji: '⏰',
+          title: 'Game already started!',
+          message: 'Sorry — that room already started playing. You can only join before the game begins.'
+        })
+      } else if (msg === 'Room not found') {
+        showDialog({
+          emoji: '🔍',
+          title: 'Hmm, wrong code?',
+          message: 'No room found with that code. Double-check and try again.'
+        })
+      } else {
+        $('#err-join').textContent = msg
+      }
       $('#btn-join').disabled = false
     }
   })
